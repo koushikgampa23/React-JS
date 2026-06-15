@@ -1,7 +1,7 @@
 # React-JS
 Contains all the concepts of react js
 
-## Javascript Basics(map, filter, find, some, every, reduce)
+## Javascript Basics(map, filter, find, some, every, reduce, sort, search)
 ### Map
     We use it to tranform the data like updating, updating at index
 
@@ -75,7 +75,7 @@ Contains all the concepts of react js
     let areQuantityValid = cart.every((cartItem)=> cartItem.quantity >= 1);
     console.log(areQuantityValid);
 
-### Calculate total
+### Reduce
     let arr = [10,20,30]
     let total = arr.reduce((acc, currentValue)=>acc+currentValue, 0);
     console.log(total);
@@ -83,6 +83,28 @@ Contains all the concepts of react js
     // Total of the cart
     let totalCartValue = cart.reduce((sum, item) => sum + item.price*item.quantity, 0);
     console.log(totalCartValue);
+
+### Sort
+    let arr = [1,9,5,10,8]
+    // arr.sort(); //This doesnot work since javascript treats everthing as string
+    arr.sort((a,b) => b-a) //b-a desc, a-b asc
+    console.log(arr);
+    // Sort manuplates the original arr we need to use spread operator to temp copy and use it
+    let sortedArr = [...arr].sort((a,b)=>b-a)
+    console.log(sortedArr);
+    console.log(arr);
+
+    let names = ["krk","abc","xerox"]
+    names.sort((a,b) => a.localeCompare(b))
+    console.log(names);
+
+    let sortedCart = [...cart].sort((a,b)=>a.name.localeCompare(b.name))
+    console.log(sortedCart);
+
+### Search
+    let searchName = "bottle"
+    let filteredResults = searchName ? cart.filter((cartItem) => cartItem.name.toLowerCase().includes(searchName.toLowerCase())) : cart;
+    console.log(filteredResults);
     
 
     
