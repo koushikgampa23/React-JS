@@ -120,7 +120,7 @@ Contains all the concepts of react js
         Filter Products by Price Range
         Edit Product
         Persist Cart in localStorage
-### Cart Application that contains add product, delete product, edit, increase quantity, sort, filter, reduce, search
+## Cart Application that contains add product, delete product, edit, increase quantity, sort, filter, reduce, search
         "use client";
 
         import { useState } from "react";
@@ -343,5 +343,60 @@ Contains all the concepts of react js
         );
         };
 
+### LocalStorage
+    1. set the local storage
+    2. get the local storage
+    3. delete the local storage
+
+    Set local storage
+    useEffect(() => {
+        localStorage.setItem("cart", JSON.stringify(cart));
+    }, [cart]);
     
+    // Set the cart in the initial render
+    useEffect(() => {
+        const storedCart = localStorage.getItem("cart");
+        storedCart ? setCart(JSON.parse(storedCart)) : [];
+    }, []);
+
+    // when places order we can delete the localstorage
+    const placeOrder = () => {
+        //order placing logic
+        setCart([]);
+        localStorage.removeItem("cart");
+    }
+
+## Theory questions
+#### Why should we not use array index as React key?
+    Array indexes should not be used as keys for dynamic lists because filtering, sorting, insertion, or deletion can change the position of items. React may then reuse the wrong DOM elements, causing incorrect UI updates. Stable unique IDs are preferred.
+#### Why is sort() dangerous on state arrays?
+    React state should be treated as immutable. Array.sort() mutates the original array, which means we are directly modifying state. This can lead to unexpected behavior and make state updates harder to reason about.
+#### difference map(), filter(), find(), some(), reduce()
+            Method	Returns
+        map()	New transformed array
+        filter()	New array with matching items
+        find()	First matching item
+        some()	Boolean (true/false)
+        reduce()	Single accumulated value
+#### Why does React require immutable updates?
+    React detects changes primarily through reference comparison
+    const arr = [1,2,3]
+    arr.push(4)
+    setCart(arr);   //This arr is still pointing to old reference old reference === new ref
+    if i use setCart([...arr, 4]) //New reference has been created old ref !== new ref
+#### useMemo for filteredCart
+    I would use useMemo when filtering or sorting is expensive and I want to avoid recalculating the result on every render. React will recompute the memoized value only when its dependencies change.
+    const totalBill = cart.reduce((sum, cartItem) => sum + cartItem.price* cartItem.quantity,0);
     
+    I use useMemo when a calculation is expensive and I want to avoid recalculating it on every render. React caches the computed value and recomputes it only when one of its dependencies changes.
+
+    For example, calculating a cart's total price can be memoized:
+
+    const totalBill = useMemo(() => {
+    return cart.reduce(
+        (sum, cartItem) => sum + cartItem.price * cartItem.quantity,
+        0
+    );
+    }, [cart]);
+
+    Without useMemo, the reduce() function runs on every render. With useMemo, it runs only when the cart changes.
