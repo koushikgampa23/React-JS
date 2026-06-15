@@ -106,6 +106,242 @@ Contains all the concepts of react js
     let filteredResults = searchName ? cart.filter((cartItem) => cartItem.name.toLowerCase().includes(searchName.toLowerCase())) : cart;
     console.log(filteredResults);
     
+### To master cart application need to learn this
+    Basic: Add Product, Delete Product, Increase Quantity, Decrease Quantity
+    Intermediate: 
+        Calculate Cart Total using reduce()
+        Show Number of Products
+        Prevent Duplicate Products using some()
+        Find Product by Name using find()
+    Advanced: 
+        Search Products 
+        Sort by Price
+        Sort by Name
+        Filter Products by Price Range
+        Edit Product
+        Persist Cart in localStorage
+### Cart Application that contains add product, delete product, edit, increase quantity, sort, filter, reduce, search
+        "use client";
+
+        import { useState } from "react";
+        import {
+        Button,
+        Input,
+        Stack,
+        Typography,
+        Alert,
+        Table,
+        TableBody,
+        TableRow,
+        TableCell,
+        TableHead,
+        } from "@mui/material";
+        import SortIcon from "@mui/icons-material/Sort";
+
+        export const CartPage = () => {
+        const [productName, setProductName] = useState("");
+        const [productQuantity, setProductQuantity] = useState(0);
+        const [productPrice, setProductPrice] = useState(0);
+        const [cart, setCart] = useState([]);
+        const [totalAmount, setTotalAmount] = useState(0);
+        const [error, setError] = useState(null);
+        const [searchProduct, setSearchProduct] = useState("");
+        const [edit, setEdit] = useState(null);
+
+        const handleCart = () => {
+            let isItemExists = cart.some(
+            (cartItem) => cartItem.productName === productName,
+            );
+            if (isItemExists) {
+            setError(`${productName} already exists`);
+            return;
+            }
+            setCart((prevState) => [
+            ...prevState,
+            {
+                id: crypto.randomUUID(),
+                productName: productName,
+                productQuantity: productQuantity,
+                productPrice: productPrice,
+            },
+            ]);
+            setProductName("");
+            setProductPrice(0);
+            setProductQuantity(0);
+        };
+
+        const handleIncreaseQuantity = (id) => {
+            let updatedCart = cart.map((cartItem) => {
+            if (cartItem.id === id) {
+                return { ...cartItem, productQuantity: cartItem.productQuantity + 1 };
+            } else {
+                return cartItem;
+            }
+            });
+            setCart(updatedCart);
+        };
+
+        const handleDecreaseQuantity = (id) => {
+            let updatedCart = cart.map((cartItem) => {
+            if (cartItem.id === id) {
+                return { ...cartItem, productQuantity: cartItem.productQuantity - 1 };
+            } else {
+                return cartItem;
+            }
+            });
+            setCart(updatedCart);
+        };
+
+        const handleDelete = (id) => {
+            let updatedCart = cart.filter((cartItem) => cartItem.id !== id);
+            setCart(updatedCart);
+        };
+
+        const handleBillingAmount = () => {
+            let billingAmount = cart.reduce(
+            (sum, item) => sum + item.productPrice * item.productQuantity,
+            0,
+            );
+            setTotalAmount(billingAmount);
+        };
+
+        const sortBasedOnProductName = () => {
+            let sortProductName = [...cart].sort((a, b) =>
+            a.productName.localeCompare(b.productName),
+            );
+            setCart(sortProductName);
+        };
+
+        const sortBasedOnProductQuantity = () => {
+            let sortProductQuantity = [...cart].sort(
+            (a, b) => b.productQuantity - a.productQuantity,
+            );
+            setCart(sortProductQuantity);
+        };
+
+        const filteredCart = searchProduct
+            ? cart.filter((cartItem) =>
+                cartItem.productName
+                .toLowerCase()
+                .includes(searchProduct.toLocaleLowerCase()),
+            )
+            : cart;
+
+        const handleProductEdit = (value, id) => {
+            let updatedCart = cart.map((cartItem) => {
+            if (cartItem.id === id) {
+                return { ...cartItem, productName: value };
+            }
+            return cartItem;
+            });
+            setCart(updatedCart);
+        };
+
+        const handleGenericEdit = (value, field, id) => {
+            let updatedCart = cart.map((cartItem) => {
+            if (cartItem.id === id) {
+                return { ...cartItem, [field]: value };
+            }
+            return cartItem;
+            });
+            setCart(updatedCart);
+        };
+
+        return (
+            <Stack gap={4}>
+            <Stack
+                direction="row"
+                gap={2}
+                sx={{ justifyContent: "space-between", alignItems: "center" }}
+            >
+                <Input
+                placeholder={"Product Name"}
+                onChange={(e) => setProductName(e.target.value)}
+                value={productName}
+                />
+                <Input
+                placeholder="Product Quantity"
+                onChange={(e) => setProductQuantity(parseInt(e.target.value))}
+                value={parseInt(productQuantity)}
+                />
+                <Input
+                type="number"
+                placeholder="Product Price"
+                onChange={(e) => setProductPrice(parseFloat(e.target.value))}
+                value={parseFloat(productPrice)}
+                />
+                <Button variant="contained" onClick={handleCart}>
+                Add Product to cart
+                </Button>
+            </Stack>
+            <Typography variant="h5">Cart Items</Typography>
+            <Input
+                placeholder="Search product here"
+                onChange={(e) => setSearchProduct(e.target.value)}
+            />
+            <Table>
+                <TableHead>
+                {filteredCart.length > 0 && (
+                    <TableRow>
+                    <TableCell>
+                        Product Name
+                        <SortIcon onClick={sortBasedOnProductName} />
+                    </TableCell>
+                    <TableCell>
+                        Product Quantity{" "}
+                        <SortIcon onClick={sortBasedOnProductQuantity} />
+                    </TableCell>
+                    <TableCell>Product Price</TableCell>
+                    <TableCell>Controls</TableCell>
+                    </TableRow>
+                )}
+                </TableHead>
+                <TableBody>
+                {filteredCart.length > 0 &&
+                    filteredCart.map((cartItem) => (
+                    <TableRow key={cartItem.id}>
+                        <TableCell>
+                        {edit && edit === cartItem.id ? (
+                            <Input
+                            value={cartItem.productName}
+                            onChange={(e) =>
+                                handleProductEdit(e.target.value, cartItem.id)
+                            }
+                            ></Input>
+                        ) : (
+                            cartItem.productName
+                        )}
+                        </TableCell>
+                        <TableCell>{cartItem.productQuantity}</TableCell>
+                        <TableCell>{cartItem.productPrice}</TableCell>
+                        <TableCell>
+                        {edit && edit === cartItem.id ? (
+                            <Button onClick={() => setEdit(null)}>Done</Button>
+                        ) : (
+                            <Button onClick={() => setEdit(cartItem.id)}>Edit</Button>
+                        )}
+                        <Button onClick={() => handleIncreaseQuantity(cartItem.id)}>
+                            +
+                        </Button>
+                        <Button onClick={() => handleDecreaseQuantity(cartItem.id)}>
+                            -
+                        </Button>
+                        <Button onClick={() => handleDelete(cartItem.id)}>
+                            Delete
+                        </Button>
+                        </TableCell>
+                    </TableRow>
+                    ))}
+                </TableBody>
+            </Table>
+            <Stack direction={"row"} sx={{ alignItems: "center" }}>
+                <Button onClick={handleBillingAmount}>Billing Amount</Button>
+                <Typography variant="caption">{totalAmount}</Typography>
+            </Stack>
+            {error && <Alert severity="error">{error}</Alert>}
+            </Stack>
+        );
+        };
 
     
     
